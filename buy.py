@@ -22,13 +22,15 @@ def buying(session_id,player,buy_price,sell_price, sell_price_low,rarity_id="1",
         trade_id = (response["auctionInfo"][(len_list-1)]['tradeId'])
         item_id = (response["auctionInfo"][(len_list-1)]['itemData']['id'])
         price = (response["auctionInfo"][(len_list-1)]['buyNowPrice'])
-        
-        bid(price, trade_id, headers)
-        send_to_tradepile(item_id, headers)
-        item_id = list_player_at_market(item_id, sell_price_low, sell_price,headers)
-        item_id = item_id['idStr']
-        profit = profit + ((sell_price*0.95) - price)
-        print(str(profit)+" profit made")
+        try:
+            bid(price, trade_id, headers)
+            send_to_tradepile(item_id, headers)
+            item_id = list_player_at_market(item_id, sell_price_low, sell_price,headers)
+            item_id = item_id['idStr']
+            profit = profit + ((sell_price*0.95) - price)
+            print(str(profit)+" profit made")
+        except:
+            print("buying failed")
         time.sleep(10)
     elif len_list == 0:
         #if there was no player, send message
@@ -39,13 +41,16 @@ def buying(session_id,player,buy_price,sell_price, sell_price_low,rarity_id="1",
     return profit, item_id
 
 def bid(price, trade_id, headers):
-    import requests
-    import json
-    print("trying to buy item for "+str(price))
-    # make a bid to the player (buynow)
-    data = ('{"bid":%s}'%price)
-    response = requests.put('https://utas.external.s2.fut.ea.com/ut/game/fifa22/trade/%s/bid'%trade_id, headers=headers, data=data)
-    response = json.loads(response.text)
+    try:
+        import requests
+        import json
+        print("trying to buy item for "+str(price))
+        # make a bid to the player (buynow)
+        data = ('{"bid":%s}'%price)
+        response = requests.put('https://utas.external.s2.fut.ea.com/ut/game/fifa22/trade/%s/bid'%trade_id, headers=headers, data=data)
+        response = json.loads(response.text)
+    except:
+        print("buying failed")
     return response
 
 def send_to_tradepile(item_id, headers):
